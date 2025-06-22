@@ -1,0 +1,4 @@
+AutoRegister: true
+Chars:
+  Help: "?"
+  Desc: "!"
