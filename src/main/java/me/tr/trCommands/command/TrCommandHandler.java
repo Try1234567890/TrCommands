@@ -10,10 +10,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class handle all registered commands
@@ -77,26 +74,20 @@ public class TrCommandHandler implements TabExecutor {
         List<String> completions = new ArrayList<>();
 
         for (TrCommand cmd : TrCommandRegistry.getCommands().values()) {
+            String name = "";
+            Set<String> alias = new HashSet<>();
             if (args.length == 1) {
-                String name = cmd.getName()[0];
-                Set<String> alias = cmd.getAliases().get(0);
-                if (name != null) completions.add(name);
-                if (alias != null) completions.addAll(alias);
+                name = cmd.getName()[0];
+                alias = cmd.getAliases().get(0);
             } else {
                 if (cmd.matches(args)) {
-                    // /test give [Material]
                     int index = args.length - 1;
-                    TrCommands.getInstance().getLogger().info("Index: %d".formatted(index));
-                    TrCommands.getInstance().getLogger().info("Name Length: %d".formatted(cmd.getName().length));
-                    TrCommands.getInstance().getLogger().info("Alias Length: %d".formatted(cmd.getAliases().size()));
-                    String name = cmd.getName().length > index ? cmd.getName()[index] : "";
-                    TrCommands.getInstance().getLogger().info("Name: %s".formatted(name));
-                    Set<String> alias = cmd.getAliases().size() > index ? cmd.getAliases().get(index) : Set.of();
-                    TrCommands.getInstance().getLogger().info("Alias: %s".formatted(alias.toString()));
-                    completions.add(name);
-                    completions.addAll(alias);
+                    name = cmd.getName().length > index ? cmd.getName()[index] : "";
+                    alias = cmd.getAliases().size() > index ? cmd.getAliases().get(index) : Set.of();
                 }
             }
+            completions.add(name);
+            completions.addAll(alias);
         }
 
         return completions;
