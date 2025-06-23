@@ -1,6 +1,0 @@
-ConsoleOnly: "<red>This command is console only! Type [command] in console."
-PlayerOnly: "<red>This command is player only! Type /[command] in game."
-NoPermission: "<red>You do not have permission to use this command!"
-CommandNotFound: "<red>Command [command] not found!"
-TargetNotFound: "<red>[targetName] not found! Make sure [targetName] is online."
-ConsoleNoTarget: "<red>Console cannot run commands without a target. Specify a target name at [commandTargetIndex]."

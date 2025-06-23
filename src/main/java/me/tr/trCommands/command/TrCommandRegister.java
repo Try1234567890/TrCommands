@@ -2,15 +2,11 @@ package me.tr.trCommands.command;
 
 import me.tr.trCommands.TrCommands;
 import me.tr.trCommands.file.FileLoader;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.plugin.Plugin;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -32,19 +28,14 @@ public class TrCommandRegister {
         PluginCommand cmd = main.getPlugin().getServer().getPluginCommand(command.getLabel());
         if (cmd == null) {
             try {
-                Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-                commandMapField.setAccessible(true);
-                CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
-                commandMap.register(command.getLabel(), new Command(String.join(" ", command.getName())) {
-                    @Override
-                    public boolean execute(@NotNull CommandSender commandSender, @NotNull String s, @NotNull String @NotNull [] strings) {
-                        return TrCommandHandler.getInstance().onCommand(commandSender, this, s, strings);
-                    }
-                });
-                TrCommandRegistry.add(command);
-                return;
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+                Constructor<PluginCommand> constructor = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
+                constructor.setAccessible(true);
+                cmd = constructor.newInstance(command.getLabel(), main.getPlugin());
+                main.getPlugin().getServer().getCommandMap().register(main.getPlugin().getName(), cmd);
+                main.getLogger().info(main.getPlugin().getServer().getCommandMap().getKnownCommands().toString());
+            } catch (NoSuchMethodException | InstantiationException |
+                     IllegalAccessException | InvocationTargetException e) {
+                main.getLogger().warn("Error while registering command " + command.getLabel() + " of " + main.getPlugin().getName());
             }
         }
         cmd.setExecutor(new TrCommandHandler());
@@ -74,7 +65,6 @@ public class TrCommandRegister {
                     if (TrCommand.class.isAssignableFrom(clazz) && !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
                         TrCommand command = (TrCommand) clazz.getConstructor().newInstance();
                         register(command);
-                        main.getLogger().info("Registered new command: " + command);
                     }
                 } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
                          IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {
@@ -82,7 +72,7 @@ public class TrCommandRegister {
                 }
             }
         } catch (IOException e) {
-            main.getLogger().warn("Cannot auto-register commands because an error occurs while opening jar plugin that use TrCommand.");
+            main.getLogger().warn("Cannot auto-register commands because an error occurs while opening jar plugin of %s.".formatted(main.getPlugin().getName()));
         }
     }
 }

@@ -33,7 +33,6 @@ public class FileLoader {
 
     private final TrCommands main = TrCommands.getInstance();
     public final String CONFIG_PATH_STR = "TrCommands/";
-    public final String DATAFOLDER_STR = main.getPlugin().getDataFolder().getPath();
     public final File CONFIG_PATH = new File(main.getPlugin().getDataFolder(), CONFIG_PATH_STR);
     private final FileManager fm = main.getTrFiles().getFileManager();
     private final Map<String, List<String>> files = new LinkedHashMap<>();
@@ -56,7 +55,8 @@ public class FileLoader {
             for (String file : entry.getValue()) {
                 FileConfiguration configuration;
                 File to = new File(path, file);
-                File insideJar = new File("cmd-" + file);
+                File insideJar = new File(CONFIG_PATH_STR, "cmd-" + file);
+                main.getLogger().debug("Processing file %s saving to %s from jar %s".formatted(file, to.getPath(), insideJar.getPath()));
                 if (!to.exists() || to.length() == 0) {
                     configuration = FileConfiguration.loadFromJar(jar, insideJar, to);
                 } else {

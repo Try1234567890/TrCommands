@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  * This class represents the Command with additional properties
  */
 public abstract class TrCommand {
+    private TrCommands main = TrCommands.getInstance();
     private String uuid;
     private String label;
     private String[] name;
@@ -197,56 +198,56 @@ public abstract class TrCommand {
         this.help = help;
     }
 
-    public boolean equals(String[] args) {
+    public boolean matches(String[] args) {
         for (int i = 0; i < args.length; i++) {
-            /*
-             * Index is used for name and aliases
-             *  --> name[i] = String
-             *  --> aliases[i] = Set<String>
-             *  --> args[i] = String
-             *  Conditions:
-             *      --> If name[i] = args[i]
-             *      --> If aliases[i] contains args[i]
-             */
             String input = args[i].toLowerCase();
+            main.getLogger().debug("Command Input (or Args[%d]): %s".formatted(i, input));
             String namePart = null;
             Set<String> argAliases = null;
             if (i < this.name.length) {
-                namePart = name[i].toLowerCase();
+                namePart = (name[i] != null ? name[i] : "").toLowerCase();
+                main.getLogger().debug("Command Name[%d]: %s".formatted(i, namePart));
             }
             if (i < this.aliases.size()) {
                 argAliases = aliases.get(i);
                 argAliases = argAliases == null ? null : argAliases.stream().map(String::toLowerCase).collect(Collectors.toSet());
+                main.getLogger().debug("Command Alias[%d]: %s".formatted(i, argAliases != null ? argAliases : "Nothing"));
             }
-            TrCommands.getInstance().getLogger().info("Command Args: %s".formatted(Arrays.toString(args)));
-            TrCommands.getInstance().getLogger().info("Command Input (or Args[%d]): %s".formatted(i, input));
-            TrCommands.getInstance().getLogger().info("Command Name[%d]: %s".formatted(i, namePart != null ? namePart : "Nothing"));
-            TrCommands.getInstance().getLogger().info("Command Alias[%d]: %s".formatted(i, argAliases != null ? argAliases : "Nothing"));
 
-            if (!input.equals(namePart) && (argAliases == null || !argAliases.contains(input))) {
-                TrCommands.getInstance().getLogger().info("Input (\"%s\") is not equals NamePart (\"%s\") and ArgAlias (\"%s\") is null or not contains it, continuing..."
+            if (input.equals(namePart) || (argAliases != null && argAliases.contains(input))) {
+                main.getLogger().debug("Input (\"%s\") is not equals NamePart (\"%s\") and ArgAlias (\"%s\") is null or not contains it, continuing..."
                         .formatted(!input.isEmpty() ? input : "Nothing",
                                 namePart != null ? namePart : "Nothing",
                                 argAliases != null ? argAliases : "Nothing")
                 );
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     public Player getTarget(String[] args, Player def) {
         if (targetIndex == -1) {
-            for (String arg : args) {
+            main.getLogger().debug("Target index is not set, trying to got automatically...");
+            for (int i = 0; i < args.length; i++) {
+                String arg = args[i];
                 Player target = Bukkit.getPlayer(arg);
-                if (target == null) continue;
-                return target;
+                if (target != null) {
+                    main.getLogger().debug("Target found at %d [%s]: %s".formatted(i, arg, target.getName()));
+                    return target;
+                }
             }
             return def;
         }
-        if ((args.length + 1) < targetIndex) return def;
+        if ((args.length + 1) < targetIndex) {
+            main.getLogger().debug("Args length %d is minus of %d, returning def...".formatted(args.length + 1, targetIndex));
+            return def;
+        }
         Player target = Bukkit.getPlayer(args[targetIndex]);
-        if (target == null) return def;
+        if (target == null) {
+            main.getLogger().debug("Target is not null at index %d".formatted(targetIndex));
+            return def;
+        }
         return target;
     }
 

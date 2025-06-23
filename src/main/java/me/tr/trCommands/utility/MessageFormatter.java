@@ -52,8 +52,8 @@ public class MessageFormatter {
     }
 
     public Component format(@NotNull String msg, Player player, Player target) {
-        if (player != null) msg = replace(msg, player, "player");
-        if (target != null) msg = replace(msg, target, "target");
+        if (player != null) msg = replace(msg, player, "Player");
+        if (target != null) msg = replace(msg, target, "Target");
         return Component.text(msg);
     }
 

@@ -4,9 +4,8 @@ import me.tr.trCommands.TrCommands;
 import me.tr.trCommands.file.Messages;
 import me.tr.trCommands.utility.MessageFormatter;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +18,7 @@ import java.util.Set;
 /**
  * This class handle all registered commands
  */
-public class TrCommandHandler implements CommandExecutor, TabCompleter {
+public class TrCommandHandler implements TabExecutor {
     private static TrCommandHandler instance;
 
     public static TrCommandHandler getInstance() {
@@ -33,7 +32,7 @@ public class TrCommandHandler implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
         for (TrCommand cmd : TrCommandRegistry.getCommands().values()) {
             TrCommands.getInstance().getLogger().debug("Checking if \"%s\" equals \"%s\"".formatted(cmd, Arrays.toString(args)));
-            if (cmd.equals(args)) {
+            if (cmd.matches(args)) {
                 @Nullable Player player = commandSender instanceof Player ? (Player) commandSender : null;
                 @Nullable Player target = cmd.getTarget(args, player);
                 if (cmd.isDesc(args)) {
@@ -81,12 +80,19 @@ public class TrCommandHandler implements CommandExecutor, TabCompleter {
             if (args.length == 1) {
                 String name = cmd.getName()[0];
                 Set<String> alias = cmd.getAliases().get(0);
-                completions.add(name);
-                completions.addAll(alias);
+                if (name != null) completions.add(name);
+                if (alias != null) completions.addAll(alias);
             } else {
-                if (cmd.equals(args)) {
-                    String name = cmd.getName()[args.length - 1];
-                    Set<String> alias = cmd.getAliases().get(args.length - 1);
+                if (cmd.matches(args)) {
+                    // /test give [Material]
+                    int index = args.length - 1;
+                    TrCommands.getInstance().getLogger().info("Index: %d".formatted(index));
+                    TrCommands.getInstance().getLogger().info("Name Length: %d".formatted(cmd.getName().length));
+                    TrCommands.getInstance().getLogger().info("Alias Length: %d".formatted(cmd.getAliases().size()));
+                    String name = cmd.getName().length > index ? cmd.getName()[index] : "";
+                    TrCommands.getInstance().getLogger().info("Name: %s".formatted(name));
+                    Set<String> alias = cmd.getAliases().size() > index ? cmd.getAliases().get(index) : Set.of();
+                    TrCommands.getInstance().getLogger().info("Alias: %s".formatted(alias.toString()));
                     completions.add(name);
                     completions.addAll(alias);
                 }

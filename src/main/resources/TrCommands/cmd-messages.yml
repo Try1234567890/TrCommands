@@ -1,0 +1,6 @@
+ConsoleOnly: "<red>This command is console only! Type [CommandLabel] [CommandName]  in console."
+PlayerOnly: "<red>This command is player only! Type /[CommandLabel] [CommandName] in game."
+NoPermission: "<red>You do not have permission to use this command!"
+CommandNotFound: "<red>Command [CommandID] not found!"
+TargetNotFound: "<red>[targetName] not found! Make sure [TargetName] is online."
+ConsoleNoTarget: "<red>Console cannot run commands without a target. Specify a target name at [CommandTargetIndex]."

@@ -23,6 +23,9 @@ public final class TrCommands {
         instance = this;
         this.plugin = plugin;
         this.logger = new BukkitLogger();
+        if (plugin == null) {
+            throw new NullPointerException("Plugin cannot be null");
+        }
         this.trFiles = new TrFiles();
         this.autoRegisterCommands = Config.AUTO_REGISTER.getBoolean();
         this.help = Config.CHAR_HELP.getString();
